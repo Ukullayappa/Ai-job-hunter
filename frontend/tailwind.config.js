@@ -7,11 +7,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#0B0F19', // Very dark blue/black
-        surface: '#1A2235', // Slightly lighter card color
-        primary: '#3B82F6', // Blue
-        secondary: '#10B981', // Emerald
-        accent: '#8B5CF6', // Purple
+        background: '#F8FAFC', // Crisp light gray
+        surface: '#FFFFFF', // Pure white cards
+        primary: '#2563EB', // Professional Blue
+        secondary: '#059669', // Emerald Green
+        accent: '#7C3AED', // Soft Purple
+        grayText: '#475569',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

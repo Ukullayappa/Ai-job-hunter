@@ -6,23 +6,23 @@
 
 @layer base {
   body {
-    @apply bg-background text-gray-100 font-sans antialiased selection:bg-primary/30;
+    @apply bg-background text-gray-800 font-sans antialiased selection:bg-primary/10;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply bg-surface/80 backdrop-blur-md border border-white/10 shadow-xl rounded-2xl;
+    @apply bg-surface border border-slate-200 shadow-sm rounded-2xl;
   }
   
   .btn-primary {
-    @apply px-4 py-2 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 
-           text-white rounded-lg font-medium transition-all duration-300 shadow-lg shadow-primary/25 
-           hover:shadow-primary/40 active:scale-95;
+    @apply px-4 py-2 bg-primary hover:bg-primary/90 
+           text-white rounded-lg font-medium transition-all duration-300 shadow-md shadow-primary/20 
+           hover:shadow-primary/30 active:scale-95;
   }
 
   .btn-secondary {
-    @apply px-4 py-2 bg-surface hover:bg-white/10 border border-white/10 
-           text-gray-200 rounded-lg font-medium transition-all duration-300 active:scale-95;
+    @apply px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 
+           text-slate-700 rounded-lg font-medium transition-all duration-300 active:scale-95;
   }
 }
