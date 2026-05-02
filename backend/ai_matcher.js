@@ -2,6 +2,7 @@ require('dotenv').config();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs');
 const path = require('path');
+const { getRecentActivity } = require('./github_service');
 
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "dummy_key");
@@ -84,13 +85,20 @@ const generateJobPrep = async (jobTitle, jobDescription) => {
         const resumePath = path.join(__dirname, 'resume.txt');
         const userResume = fs.readFileSync(resumePath, 'utf8');
 
+        // GET GITHUB PULSE
+        const githubPulse = await getRecentActivity("Ukullayappa");
+
         const prompt = `
-        You are an elite career coach. Based on the CANDIDATE RESUME and the JOB DESCRIPTION below, generate:
+        You are an elite career coach. Based on the CANDIDATE RESUME, their LIVE GITHUB ACTIVITY, and the JOB DESCRIPTION below, generate:
         1. A highly professional, 200-word COVER LETTER that highlights the candidate's projects (React, Node, etc.).
-        2. TOP 5 INTERVIEW QUESTIONS this candidate should prepare for, with short 1-sentence "Killer Answers".
+        2. MENTION their live GitHub pulse: "${githubPulse}". Use this to prove they are currently active and learning.
+        3. TOP 5 INTERVIEW QUESTIONS this candidate should prepare for, with short 1-sentence "Killer Answers".
 
         --- RESUME ---
         ${userResume}
+
+        --- LIVE GITHUB PULSE ---
+        ${githubPulse}
 
         --- JOB ---
         ${jobTitle}: ${jobDescription}
