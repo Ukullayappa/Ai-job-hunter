@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const db = require('./db');
 
+const { startJobHunt } = require('./scraper');
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -10,6 +12,13 @@ app.use(express.json());
 // Basic routes for testing
 app.get('/api/status', (req, res) => {
     res.json({ status: 'Online', message: 'AI Job Assistant Backend is connected to Supabase.' });
+});
+
+// TRIGGER THE SCRAPER MANUALLY
+app.get('/api/hunt', async (req, res) => {
+    // We run it in the background so the request doesn't timeout
+    startJobHunt();
+    res.json({ message: '🚀 Scraper started in the background! Check your Telegram for updates soon.' });
 });
 
 // Fetch all jobs from Supabase
