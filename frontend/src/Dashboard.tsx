@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Briefcase, CheckCircle, XCircle, Mail, MessageSquare } from 'lucide-react';
 
 interface Job {
