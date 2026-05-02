@@ -48,19 +48,24 @@ const startJobHunt = async () => {
             console.log(`✅ Found ${results.length} potential leads.`);
 
             for (const res of results) {
-                // For a real app, we would visit the link and scrape the full description.
-                // For this version, we use the title and a snippet for AI evaluation.
                 console.log(`\n🧠 AI evaluating: ${res.title}`);
                 
-                const match = await evaluateJobMatch(res.title, `This is a job posting for ${res.title} found at ${res.url}. It appears to be a fresher-level IT role.`);
+                // Extract a clean company name from the URL
+                let companyName = "Top Tech Company";
+                try {
+                    const domain = new URL(res.url).hostname.replace('www.', '').split('.')[0];
+                    companyName = domain.charAt(0).toUpperCase() + domain.slice(1);
+                } catch (e) {}
+
+                const match = await evaluateJobMatch(res.title, `This is a job posting for ${res.title} at ${companyName}. Found at ${res.url}. It appears to be a fresher-level IT role.`);
                 
                 if (match.score >= 60) {
                     console.log(`🔥 HIGH MATCH FOUND (${match.score}%)! Notifying user...`);
                     
                     // 1. Save to Supabase
                     await db.query(
-                        "INSERT INTO ai_jobs (title, company, location, platform, match_score, status, url) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (url) DO NOTHING",
-                        [res.title, "Unknown Company", "Bangalore/Hyd", "Web Search", match.score, 'PENDING', res.url]
+                        "INSERT INTO ai_jobs (title, company, location, platform, match_score, status, url, ai_summary) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT (url) DO NOTHING",
+                        [res.title, companyName, "Bangalore/Hyd", "Web Search", match.score, 'PENDING_APPROVAL', res.url, match.summary]
                     );
 
                     // 2. Send Telegram Notification
