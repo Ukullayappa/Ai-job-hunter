@@ -1,0 +1,49 @@
+Uravakonda Kullayappa 
++91 95159 90059 | ukullayappa1@gmail.com | In linkedin.com/in/uravakonda-kullayappa-57a326368 | github.com/Ukullayappa | Andhra Pradesh 
+PROFESSIONAL SUMMARY 
+Results-driven Full Stack Developer with hands-on experience building 4+ production-grade applications using React.js, Node.js, Express.js, and PostgreSQL. B.Tech 
+graduate (ECE, CGPA 7.8) with Udemy Full Stack certification and VLSI internship at ExcelR. Proficient in REST APIs, WebSockets, CI/CD pipelines, and Agile 
+development. Seeking an entry-level Full Stack / Backend / Frontend Developer role to deliver scalable, high-impact solutions. 
+TECHNICAL SKILLS 
+Languages: Java, JavaScript (ES6+), HTML5, CSS3, SQL 
+Frontend: React.js, Responsive Design, Chart.js, Component-Based Architecture 
+Backend: Node.js, Express.js, REST APIs, WebSockets (Socket.io), MVC Architecture 
+Database: PostgreSQL (CRUD, Query Optimization, Relational Modeling) 
+Tools & DevOps: Git, GitHub, VS Code, GitHub Pages, GitHub Actions (CI/CD), npm, Agile/Scrum 
+Concepts: OOP, Data Structures & Algorithms, SDLC, RESTful Architecture 
+INTERNSHIP EXPERIENCE 
+VLSI Design Intern — ExcelR Solutions 
+• Completed structured VLSI internship program covering digital design fundamentals and chip-level concepts. 
+• Gained hands-on exposure to hardware description and design verification methodologies. 
+PROJECTS 
+E-Commerce Web Application | React.js, Node.js, Express.js, PostgreSQL 
+2023 – 2024 
+• Architected full-stack platform with end-to-end user flows: product browsing, cart management, and secure JWT-based authentication. 
+• Designed 10+ RESTful API endpoints for CRUD operations, order management, and session handling with query-optimized PostgreSQL. 
+• Built responsive React.js frontend using component-based architecture integrated with normalized relational data storage. 
+Real-Time Live Chat Application | React.js, Node.js, Socket.io, PostgreSQL 
+2026 
+• Engineered bi-directional messaging via WebSocket (Socket.io) supporting private 1-on-1 chats and multi-user group rooms with 50+concurrent connections. 
+• Persisted message history in PostgreSQL and built responsive React.js UI with real-time presence indicators across 3+ chat views. 
+Analytics Dashboard | React.js, Node.js, Express.js, Chart.js 
+2026 
+• Built interactive dashboard with Chart.js (bar, line, pie charts), enabling stakeholders to interpret business metrics 40% faster than rawdata tables. 
+• Developed Node.js/Express.js aggregation APIs with dynamic filters, multi-metric selectors, and CSV export functionality. 
+Developer Portfolio Website | React.js, HTML5, CSS3, GitHub Pages 
+2026 
+• Designed and deployed responsive portfolio using React.js with automated CI/CD pipeline via GitHub Actions on GitHub Pages. 
+EDUCATION 
+B.Tech — Electronics & Communication Engineering | CGPA: 7.8/10 
+Ananthalakshmi Institute of Technology and Sciences, Andhra Pradesh, India 
+Intermediate (MPC) — Board of Intermediate Education, AP — 81.9% 
+Sri Sai Krupa Junior College, Dharmavaram 
+SSC — Board of Secondary Education, AP — 100% — School Topper 
+Sri Gayatri English Medium High School, Dharmavaram 
+CERTIFICATIONS 
+Aug 2022 – May 2026 
+2020 – 2022 
+2020 
+• The Complete Full-Stack Web Development Bootcamp — Udemy (Dr. Angela Yu) | 2026 
+• SQL & PostgreSQL: Database Management — Udemy | 2026 
+LANGUAGES 
+Telugu: Native | English: Professional Working Proficiency

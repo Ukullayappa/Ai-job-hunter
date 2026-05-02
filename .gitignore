@@ -1,0 +1,15 @@
+node_modules/
+.env
+.DS_Store
+dist/
+build/
+*.pdf
+extract_resume.js
+test_ai.js
+test_connection.js
+test_raw.js
+test_raw_v1.js
+find_model.js
+find_flash.js
+list_models_raw.js
+get_chat_id.js
