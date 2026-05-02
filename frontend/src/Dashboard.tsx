@@ -15,16 +15,18 @@ interface Job {
 export default function Dashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
 
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
   useEffect(() => {
-    fetch('http://localhost:5000/api/jobs')
+    fetch(`${API_URL}/api/jobs`)
       .then(res => res.json())
       .then(data => setJobs(data))
       .catch(err => console.error("Error fetching jobs:", err));
-  }, []);
+  }, [API_URL]);
 
   const handleApprove = async (id: string) => {
     try {
-      await fetch(`http://localhost:5000/api/jobs/${id}/approve`, { method: 'POST' });
+      await fetch(`${API_URL}/api/jobs/${id}/approve`, { method: 'POST' });
       setJobs(jobs.map(j => j.id === id ? { ...j, status: 'APPROVED' } : j));
     } catch (error) {
       console.error(error);
@@ -33,7 +35,7 @@ export default function Dashboard() {
 
   const handleReject = async (id: string) => {
     try {
-      await fetch(`http://localhost:5000/api/jobs/${id}/reject`, { method: 'POST' });
+      await fetch(`${API_URL}/api/jobs/${id}/reject`, { method: 'POST' });
       setJobs(jobs.map(j => j.id === id ? { ...j, status: 'REJECTED' } : j));
     } catch (error) {
       console.error(error);
