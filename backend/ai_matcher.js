@@ -45,8 +45,8 @@ const evaluateJobMatch = async (jobTitle, jobDescription) => {
         5. If a job requires 2+ years of experience, give it a low score (< 40).
 
         Return ONLY a JSON object with two fields:
-        1. "score": An integer from 0 to 100 representing the match percentage.
-        2. "summary": A short, 2-sentence summary explaining why it is a good/bad match for a 2026 fresher.
+        1. "score": An integer from 0 to 100 representing the "Recruitment Probability Percentage" (how likely they are to get the job if they apply).
+        2. "summary": A detailed AI summary explaining exactly why they have this recruitment chance, highlighting their matching skills from their resume (like React, Node, SQL) and any missing requirements.
         
         Do NOT wrap the JSON in markdown code blocks. Just output raw JSON.
 
