@@ -76,4 +76,41 @@ const evaluateJobMatch = async (jobTitle, jobDescription) => {
     }
 };
 
-module.exports = { evaluateJobMatch };
+/**
+ * Generates a custom cover letter and interview questions for a specific job.
+ */
+const generateJobPrep = async (jobTitle, jobDescription) => {
+    try {
+        const resumePath = path.join(__dirname, 'resume.txt');
+        const userResume = fs.readFileSync(resumePath, 'utf8');
+
+        const prompt = `
+        You are an elite career coach. Based on the CANDIDATE RESUME and the JOB DESCRIPTION below, generate:
+        1. A highly professional, 200-word COVER LETTER that highlights the candidate's projects (React, Node, etc.).
+        2. TOP 5 INTERVIEW QUESTIONS this candidate should prepare for, with short 1-sentence "Killer Answers".
+
+        --- RESUME ---
+        ${userResume}
+
+        --- JOB ---
+        ${jobTitle}: ${jobDescription}
+
+        Return ONLY a JSON object:
+        {
+            "coverLetter": "...",
+            "interviewPrep": "..."
+        }
+        `;
+
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text().trim();
+        const cleanJsonStr = responseText.replace(/```json/gi, '').replace(/```/gi, '').trim();
+        return JSON.parse(cleanJsonStr);
+    } catch (error) {
+        console.error("❌ Error generating prep:", error.message);
+        return { coverLetter: "Failed to generate.", interviewPrep: "Failed to generate." };
+    }
+};
+
+module.exports = { evaluateJobMatch, generateJobPrep };

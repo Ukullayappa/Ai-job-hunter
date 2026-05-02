@@ -10,11 +10,14 @@ interface Job {
   status: string;
   aiSummary: string;
   url: string;
+  cover_letter?: string;
+  interview_questions?: string;
 }
 
 export default function Dashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [stats, setStats] = useState({ scraped: 0, applied: 0 });
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -118,7 +121,21 @@ export default function Dashboard() {
             </div>
           ))}
 
-          {jobs.filter(j => j.status === 'PENDING_APPROVAL').length === 0 && (
+          {jobs.filter(j => j.status === 'APPROVED').map((job) => (
+            <div key={job.id} className="glass-card p-6 border-green-500/20 opacity-90">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-bold text-white">{job.title}</h3>
+                  <p className="text-primary text-sm">{job.company}</p>
+                </div>
+                <button onClick={() => setSelectedJob(job)} className="px-4 py-2 bg-green-500/10 text-green-400 border border-green-500/30 rounded-lg text-xs font-bold hover:bg-green-500/20 transition-all">
+                  VIEW PRO KIT
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {jobs.filter(j => j.status === 'PENDING_APPROVAL').length === 0 && jobs.filter(j => j.status === 'APPROVED').length === 0 && (
              <div className="glass-card p-12 text-center text-gray-400">
                 <p>You're all caught up! The AI is hunting for more jobs.</p>
              </div>
@@ -155,6 +172,53 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      {/* PRO KIT MODAL */}
+      {selectedJob && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="glass-card max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 relative">
+            <button onClick={() => setSelectedJob(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+              <XCircle className="w-6 h-6" />
+            </button>
+            
+            <h2 className="text-3xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+              Application Pro Kit
+            </h2>
+            
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-lg font-semibold text-accent mb-3 flex items-center gap-2">
+                  <Mail className="w-5 h-5" /> AI Cover Letter
+                </h3>
+                <div className="p-4 bg-background/50 rounded-xl border border-white/5 text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+                  {selectedJob.cover_letter || "Generating..."}
+                </div>
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(selectedJob.cover_letter || "");
+                    alert("Copied to clipboard!");
+                  }}
+                  className="mt-3 text-xs text-primary font-medium hover:underline"
+                >
+                  Copy Cover Letter
+                </button>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-primary mb-3 flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" /> Interview Prep
+                </h3>
+                <div className="p-4 bg-background/50 rounded-xl border border-white/5 text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+                  {selectedJob.interview_questions || "Analyzing interview patterns..."}
+                </div>
+              </div>
+              
+              <a href={selectedJob.url} target="_blank" rel="noreferrer" className="block w-full btn-primary text-center">
+                Go Apply Now
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

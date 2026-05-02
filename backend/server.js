@@ -4,6 +4,7 @@ const cors = require('cors');
 const db = require('./db');
 
 const { startJobHunt } = require('./scraper');
+const { evaluateJobMatch, generateJobPrep } = require('./ai_matcher');
 
 const app = express();
 app.use(cors());
@@ -34,17 +35,25 @@ app.get('/api/jobs', async (req, res) => {
 
 // Approve a job
 app.post('/api/jobs/:id/approve', async (req, res) => {
-    const { id } = req.params;
     try {
-        const result = await db.query(
-            "UPDATE ai_jobs SET status = 'APPROVED' WHERE id = $1 RETURNING *",
-            [id]
-        );
-        if (result.rowCount > 0) {
-            res.json({ success: true, job: result.rows[0] });
-        } else {
-            res.status(404).json({ error: 'Job not found' });
+        const { id } = req.params;
+        const jobResult = await db.query('SELECT * FROM ai_jobs WHERE id = $1', [id]);
+        
+        if (jobResult.rowCount === 0) {
+            return res.status(404).json({ error: 'Job not found' });
         }
+        
+        const job = jobResult.rows[0];
+
+        // Generate the Pro Kit
+        const prep = await generateJobPrep(job.title, `Company: ${job.company}. Platform: ${job.platform}`);
+
+        await db.query(
+            "UPDATE ai_jobs SET status = 'APPROVED', cover_letter = $1, interview_questions = $2 WHERE id = $3",
+            [prep.coverLetter, prep.interviewPrep, id]
+        );
+
+        res.json({ success: true, message: 'Job approved and Pro Kit generated!' });
     } catch (err) {
         console.error('Error approving job:', err);
         res.status(500).json({ error: 'Database error' });
