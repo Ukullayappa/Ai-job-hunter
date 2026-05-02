@@ -70,6 +70,21 @@ app.post('/api/jobs/:id/reject', async (req, res) => {
     }
 });
 
+// Get real stats for the dashboard
+app.get('/api/stats', async (req, res) => {
+    try {
+        const totalResult = await db.query('SELECT COUNT(*) FROM ai_jobs');
+        const approvedResult = await db.query("SELECT COUNT(*) FROM ai_jobs WHERE status = 'APPROVED'");
+        res.json({
+            scraped: totalResult.rows[0].count,
+            applied: approvedResult.rows[0].count
+        });
+    } catch (err) {
+        console.error('Error fetching stats:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

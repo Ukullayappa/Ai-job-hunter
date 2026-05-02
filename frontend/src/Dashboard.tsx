@@ -14,14 +14,22 @@ interface Job {
 
 export default function Dashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [stats, setStats] = useState({ scraped: 0, applied: 0 });
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
+    // Fetch Jobs
     fetch(`${API_URL}/api/jobs`)
       .then(res => res.json())
       .then(data => setJobs(data))
       .catch(err => console.error("Error fetching jobs:", err));
+
+    // Fetch Stats
+    fetch(`${API_URL}/api/stats`)
+      .then(res => res.json())
+      .then(data => setStats(data))
+      .catch(err => console.error("Error fetching stats:", err));
   }, [API_URL]);
 
   const handleApprove = async (id: string) => {
@@ -126,20 +134,10 @@ export default function Dashboard() {
 
           <div className="glass-card p-5 space-y-4">
              <div className="flex gap-3 items-start p-3 bg-white/5 rounded-lg border border-white/5">
-                <MessageSquare className="w-5 h-5 text-green-400 shrink-0 mt-1" />
+                <MessageSquare className="w-5 h-5 text-primary shrink-0 mt-1" />
                 <div>
-                  <p className="text-sm font-medium text-white">Recruiter Message (LinkedIn)</p>
-                  <p className="text-xs text-gray-400 mt-1">"Hi there, I saw your profile and we have an opening..."</p>
-                  <p className="text-xs text-green-400 mt-2 flex items-center gap-1">✓ Sent to WhatsApp</p>
-                </div>
-             </div>
-
-             <div className="flex gap-3 items-start p-3 bg-white/5 rounded-lg border border-white/5">
-                <Mail className="w-5 h-5 text-blue-400 shrink-0 mt-1" />
-                <div>
-                  <p className="text-sm font-medium text-white">Interview Invite (Gmail)</p>
-                  <p className="text-xs text-gray-400 mt-1">Tech Innovators wants to schedule a call.</p>
-                  <p className="text-xs text-green-400 mt-2 flex items-center gap-1">✓ Sent to WhatsApp</p>
+                  <p className="text-sm font-medium text-white">System Active</p>
+                  <p className="text-xs text-gray-400 mt-1">Bot is monitoring LinkedIn & Naukri...</p>
                 </div>
              </div>
           </div>
@@ -147,12 +145,12 @@ export default function Dashboard() {
           <h2 className="text-2xl font-semibold mt-8 mb-6">Stats</h2>
           <div className="grid grid-cols-2 gap-4">
              <div className="glass-card p-4 text-center">
-                <p className="text-3xl font-bold text-primary">142</p>
+                <p className="text-3xl font-bold text-primary">{stats.scraped}</p>
                 <p className="text-xs text-gray-400 uppercase tracking-wide mt-1">Jobs Scraped</p>
              </div>
              <div className="glass-card p-4 text-center">
-                <p className="text-3xl font-bold text-accent">12</p>
-                <p className="text-xs text-gray-400 uppercase tracking-wide mt-1">Applications Sent</p>
+                <p className="text-3xl font-bold text-accent">{stats.applied}</p>
+                <p className="text-xs text-gray-400 uppercase tracking-wide mt-1">Approved</p>
              </div>
           </div>
         </div>
