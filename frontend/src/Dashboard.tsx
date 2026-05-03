@@ -18,6 +18,7 @@ export default function Dashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [stats, setStats] = useState({ scraped: 0, applied: 0 });
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -36,11 +37,19 @@ export default function Dashboard() {
   }, [API_URL]);
 
   const handleApprove = async (id: string) => {
+    setApprovingId(id);
     try {
-      await fetch(`${API_URL}/api/jobs/${id}/approve`, { method: 'POST' });
-      setJobs(jobs.map(j => j.id === id ? { ...j, status: 'APPROVED' } : j));
+      const res = await fetch(`${API_URL}/api/jobs/${id}/approve`, { method: 'POST' });
+      const data = await res.json();
+      if (data.job) {
+        setJobs(jobs.map(j => j.id === id ? data.job : j));
+      } else {
+        setJobs(jobs.map(j => j.id === id ? { ...j, status: 'APPROVED' } : j));
+      }
     } catch (error) {
       console.error(error);
+    } finally {
+      setApprovingId(null);
     }
   };
 
@@ -111,8 +120,12 @@ export default function Dashboard() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 mt-2">
-                <button onClick={() => handleApprove(job.id)} className="flex-1 btn-primary flex items-center justify-center gap-2">
-                  <CheckCircle className="w-5 h-5" /> Approve & Apply
+                <button onClick={() => handleApprove(job.id)} disabled={approvingId === job.id} className="flex-1 btn-primary flex items-center justify-center gap-2 disabled:opacity-70">
+                  {approvingId === job.id ? (
+                    <span className="animate-pulse">Generating Pro Kit...</span>
+                  ) : (
+                    <><CheckCircle className="w-5 h-5" /> Approve & Apply</>
+                  )}
                 </button>
                 <button onClick={() => handleReject(job.id)} className="flex-1 btn-secondary flex items-center justify-center gap-2 hover:bg-red-50 hover:text-white hover:border-red-100">
                   <XCircle className="w-5 h-5" /> Reject

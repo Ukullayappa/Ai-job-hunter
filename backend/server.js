@@ -57,12 +57,12 @@ app.post('/api/jobs/:id/approve', async (req, res) => {
         // Generate the Pro Kit
         const prep = await generateJobPrep(job.title, `Company: ${job.company}. Platform: ${job.platform}`);
 
-        await db.query(
-            "UPDATE ai_jobs SET status = 'APPROVED', cover_letter = $1, interview_questions = $2 WHERE id = $3",
+        const updatedResult = await db.query(
+            "UPDATE ai_jobs SET status = 'APPROVED', cover_letter = $1, interview_questions = $2 WHERE id = $3 RETURNING *",
             [prep.coverLetter, prep.interviewPrep, id]
         );
 
-        res.json({ success: true, message: 'Job approved and Pro Kit generated!' });
+        res.json({ success: true, message: 'Job approved and Pro Kit generated!', job: updatedResult.rows[0] });
     } catch (err) {
         console.error('Error approving job:', err);
         res.status(500).json({ error: 'Database error' });
