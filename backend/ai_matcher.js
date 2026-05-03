@@ -1,4 +1,5 @@
 require('dotenv').config();
+console.log("🚀 [AI MATCHER V2] Using model: gemini-flash-latest");
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs');
 const path = require('path');
