@@ -78,66 +78,77 @@ const evaluateJobMatch = async (jobTitle, jobDescription) => {
     }
 };
 
+const OpenAI = require('openai');
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
 /**
  * Generates a custom cover letter and interview questions for a specific job.
+ * FALLBACK: If Gemini fails, it tries OpenAI (ChatGPT).
  */
 const generateJobPrep = async (jobTitle, jobDescription) => {
+    const resumePath = path.join(__dirname, 'resume.txt');
+    const userResume = fs.readFileSync(resumePath, 'utf8');
+    const githubPulse = await getRecentActivity("Ukullayappa");
+
+    const prompt = `
+    You are an elite career coach. Based on the CANDIDATE RESUME, their LIVE GITHUB ACTIVITY, and the JOB DESCRIPTION below, generate:
+    1. A highly professional, 200-word COVER LETTER that highlights the candidate's projects (React, Node, etc.).
+    2. MENTION their live GitHub pulse: "${githubPulse}".
+    3. TOP 5 INTERVIEW QUESTIONS this candidate should prepare for, with short 1-sentence "Killer Answers".
+
+    Return ONLY a JSON object:
+    {
+        "coverLetter": "...",
+        "interviewPrep": "..."
+    }
+
+    --- RESUME ---
+    ${userResume}
+    --- JOB ---
+    ${jobTitle}: ${jobDescription}
+    `;
+
+    // TRY GEMINI FIRST
     try {
-        const resumePath = path.join(__dirname, 'resume.txt');
-        const userResume = fs.readFileSync(resumePath, 'utf8');
-
-        // GET GITHUB PULSE
-        const githubPulse = await getRecentActivity("Ukullayappa");
-
-        const prompt = `
-        You are an elite career coach. Based on the CANDIDATE RESUME, their LIVE GITHUB ACTIVITY, and the JOB DESCRIPTION below, generate:
-        1. A highly professional, 200-word COVER LETTER that highlights the candidate's projects (React, Node, etc.).
-        2. MENTION their live GitHub pulse: "${githubPulse}". Use this to prove they are currently active and learning.
-        3. TOP 5 INTERVIEW QUESTIONS this candidate should prepare for, with short 1-sentence "Killer Answers".
-
-        --- RESUME ---
-        ${userResume}
-
-        --- LIVE GITHUB PULSE ---
-        ${githubPulse}
-
-        --- JOB ---
-        ${jobTitle}: ${jobDescription}
-
-        Return ONLY a JSON object:
-        {
-            "coverLetter": "...",
-            "interviewPrep": "..."
-        }
-        `;
-
+        console.log("🤖 Attempting Pro Kit generation with Gemini...");
         const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
         const result = await model.generateContent(prompt);
         const responseText = result.response.text().trim();
         const cleanJsonStr = responseText.replace(/```json/gi, '').replace(/```/gi, '').trim();
         
-        let parsed;
-        try {
-            parsed = JSON.parse(cleanJsonStr);
-        } catch (e) {
-            console.error("❌ Failed to parse AI JSON. Raw response:", responseText);
-            // Fallback: try to extract content if JSON is malformed
-            return {
-                coverLetter: "Detailed cover letter is ready in your mind! (AI parsing error)",
-                interviewPrep: "Prepare for core technical questions. (AI parsing error)"
-            };
+        const parsed = JSON.parse(cleanJsonStr);
+        return {
+            coverLetter: parsed.coverLetter || parsed.cover_letter || "Generated.",
+            interviewPrep: parsed.interviewPrep || parsed.interview_questions || "Generated."
+        };
+    } catch (geminiError) {
+        console.warn("⚠️ Gemini failed, checking for OpenAI fallback...");
+
+        // TRY OPENAI FALLBACK
+        if (process.env.OPENAI_API_KEY) {
+            try {
+                console.log("🚀 Gemini failed. Using ChatGPT fallback...");
+                const response = await openai.chat.completions.create({
+                    model: "gpt-4o",
+                    messages: [{ role: "user", content: prompt }],
+                    response_format: { type: "json_object" }
+                });
+                
+                const parsed = JSON.parse(response.choices[0].message.content);
+                return {
+                    coverLetter: parsed.coverLetter || parsed.cover_letter || "Generated (ChatGPT).",
+                    interviewPrep: parsed.interviewPrep || parsed.interview_questions || "Generated (ChatGPT)."
+                };
+            } catch (openaiError) {
+                console.error("❌ Both Gemini and OpenAI failed.");
+            }
+        } else {
+            console.warn("❌ OpenAI API Key missing. Cannot use fallback.");
         }
 
-        // Normalize keys (handle both camelCase and snake_case)
-        return {
-            coverLetter: parsed.coverLetter || parsed.cover_letter || "Professional cover letter generated.",
-            interviewPrep: parsed.interviewPrep || parsed.interview_questions || parsed.interview_prep || "Technical interview preparation guide ready."
-        };
-    } catch (error) {
-        console.error("❌ Error generating prep:", error.message);
         return { 
-            coverLetter: "Click Approve again to retry cover letter generation.", 
-            interviewPrep: "Click Approve again to retry interview prep generation." 
+            coverLetter: "Generation failed. Please check your API keys or try again later.", 
+            interviewPrep: "Generation failed. Please check your API keys or try again later." 
         };
     }
 };
