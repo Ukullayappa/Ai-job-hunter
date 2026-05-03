@@ -26,7 +26,15 @@ export default function Dashboard() {
     // Fetch Jobs
     fetch(`${API_URL}/api/jobs`)
       .then(res => res.json())
-      .then(data => setJobs(data))
+      .then(data => {
+        // Map database snake_case to frontend camelCase
+        const mappedJobs = data.map((j: any) => ({
+          ...j,
+          matchScore: j.match_score,
+          aiSummary: j.ai_summary
+        }));
+        setJobs(mappedJobs);
+      })
       .catch(err => console.error("Error fetching jobs:", err));
 
     // Fetch Stats

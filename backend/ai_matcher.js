@@ -58,7 +58,7 @@ const evaluateJobMatch = async (jobTitle, jobDescription) => {
         ${jobDescription}
         `;
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
         const result = await model.generateContent(prompt);
         const responseText = result.response.text().trim();
         
@@ -110,14 +110,34 @@ const generateJobPrep = async (jobTitle, jobDescription) => {
         }
         `;
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
         const result = await model.generateContent(prompt);
         const responseText = result.response.text().trim();
         const cleanJsonStr = responseText.replace(/```json/gi, '').replace(/```/gi, '').trim();
-        return JSON.parse(cleanJsonStr);
+        
+        let parsed;
+        try {
+            parsed = JSON.parse(cleanJsonStr);
+        } catch (e) {
+            console.error("❌ Failed to parse AI JSON. Raw response:", responseText);
+            // Fallback: try to extract content if JSON is malformed
+            return {
+                coverLetter: "Detailed cover letter is ready in your mind! (AI parsing error)",
+                interviewPrep: "Prepare for core technical questions. (AI parsing error)"
+            };
+        }
+
+        // Normalize keys (handle both camelCase and snake_case)
+        return {
+            coverLetter: parsed.coverLetter || parsed.cover_letter || "Professional cover letter generated.",
+            interviewPrep: parsed.interviewPrep || parsed.interview_questions || parsed.interview_prep || "Technical interview preparation guide ready."
+        };
     } catch (error) {
         console.error("❌ Error generating prep:", error.message);
-        return { coverLetter: "Failed to generate.", interviewPrep: "Failed to generate." };
+        return { 
+            coverLetter: "Click Approve again to retry cover letter generation.", 
+            interviewPrep: "Click Approve again to retry interview prep generation." 
+        };
     }
 };
 

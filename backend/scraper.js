@@ -13,7 +13,8 @@ puppeteer.use(StealthPlugin());
 const SEARCH_QUERIES = [
     'site:lever.co OR site:greenhouse.io "Software Engineer" AND "India"',
     'site:jobs.ashbyhq.com "Frontend Developer" OR "Full Stack"',
-    'site:careers.*.com "Software Developer" "Fresher" OR "0-2 years"'
+    'site:careers.*.com "Software Developer" "Fresher" OR "0-2 years"',
+    'site:naukri.com "Software Engineer" "2026 Batch" OR "Fresher"'
 ];
 
 /**

@@ -15,6 +15,8 @@ const createTables = async () => {
         match_score INTEGER,
         status VARCHAR(50) DEFAULT 'PENDING_APPROVAL',
         ai_summary TEXT,
+        cover_letter TEXT,
+        interview_questions TEXT,
         posted_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
