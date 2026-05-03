@@ -6,8 +6,11 @@ const { sendRecruiterAlert } = require('./notifier');
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_APP_PASSWORD;
 
-// Keywords to look for in the subject line to identify job-related emails
-const RECRUITER_KEYWORDS = ['interview', 'application', 'hiring', 'recruiter', 'job', 'offer', 'assessment', 'career', 'opportunity', 'talent'];
+// Keywords to look for in the subject line to identify real recruiter/interview emails
+const RECRUITER_KEYWORDS = ['interview', 'shortlisted', 'hiring manager', 'recruiter reached out', 'offer letter', 'assessment link', 'schedule a call', 'technical round'];
+
+// Keywords to ignore (common in automated newsletters and job alerts)
+const EXCLUDE_KEYWORDS = ['job alert', 'daily digest', 'weekly newsletter', 'matching your profile', 'recommended for you', 'new jobs in', 'unsubscribe'];
 
 const startEmailMonitor = async () => {
     if (!EMAIL_USER || !EMAIL_PASS) {
@@ -56,9 +59,10 @@ const startEmailMonitor = async () => {
                     
                     const lowerSubject = subject.toLowerCase();
                     const isRecruiterEmail = RECRUITER_KEYWORDS.some(kw => lowerSubject.includes(kw));
+                    const isSpam = EXCLUDE_KEYWORDS.some(kw => lowerSubject.includes(kw));
 
-                    // Check if it's a recruiter and not a standard no-reply automated email
-                    if (isRecruiterEmail && !from.toLowerCase().includes("no-reply") && !from.toLowerCase().includes("noreply")) {
+                    // Check if it's a recruiter and not a standard no-reply automated email or job alert
+                    if (isRecruiterEmail && !isSpam && !from.toLowerCase().includes("no-reply") && !from.toLowerCase().includes("noreply")) {
                         console.log(`📬 Found relevant job email: ${subject}`);
                         
                         let textBody = parsed.text || "No text body available.";
