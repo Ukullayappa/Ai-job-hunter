@@ -10,7 +10,7 @@ const EMAIL_PASS = process.env.EMAIL_APP_PASSWORD;
 const RECRUITER_KEYWORDS = ['interview', 'shortlisted', 'hiring manager', 'recruiter reached out', 'offer letter', 'assessment link', 'schedule a call', 'technical round'];
 
 // Keywords to ignore (common in automated newsletters and job alerts)
-const EXCLUDE_KEYWORDS = ['job alert', 'daily digest', 'weekly newsletter', 'matching your profile', 'recommended for you', 'new jobs in', 'unsubscribe'];
+const EXCLUDE_KEYWORDS = ['job alert', 'daily digest', 'weekly newsletter', 'matching your profile', 'recommended for you', 'new jobs in', 'unsubscribe', 'github', 'vercel', 'deployment', 'successfully deployed'];
 
 const startEmailMonitor = async () => {
     if (!EMAIL_USER || !EMAIL_PASS) {
@@ -59,7 +59,8 @@ const startEmailMonitor = async () => {
                     
                     const lowerSubject = subject.toLowerCase();
                     const isRecruiterEmail = RECRUITER_KEYWORDS.some(kw => lowerSubject.includes(kw));
-                    const isSpam = EXCLUDE_KEYWORDS.some(kw => lowerSubject.includes(kw));
+                    const isSpam = EXCLUDE_KEYWORDS.some(kw => lowerSubject.includes(kw)) || 
+                                   EXCLUDE_KEYWORDS.some(kw => from.toLowerCase().includes(kw));
 
                     // Check if it's a recruiter and not a standard no-reply automated email or job alert
                     if (isRecruiterEmail && !isSpam && !from.toLowerCase().includes("no-reply") && !from.toLowerCase().includes("noreply")) {
