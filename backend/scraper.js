@@ -11,9 +11,9 @@ const db = require('./db');
 puppeteer.use(StealthPlugin());
 
 const SEARCH_QUERIES = [
-    'site:*.com/careers "Software Engineer" fresher Bangalore 2026',
-    'site:*.com/careers "Full Stack Developer" junior Hyderabad 2026',
-    'site:*.com/careers "Backend Developer" fresher Remote 2026'
+    'site:lever.co OR site:greenhouse.io "Software Engineer" AND "India"',
+    'site:jobs.ashbyhq.com "Frontend Developer" OR "Full Stack"',
+    'site:careers.*.com "Software Developer" "Fresher" OR "0-2 years"'
 ];
 
 /**
