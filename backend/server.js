@@ -11,6 +11,10 @@ app.use(cors());
 app.use(express.json());
 
 // Basic routes for testing
+app.get('/', (req, res) => {
+    res.send('Backend is running!');
+});
+
 app.get('/api/status', (req, res) => {
     res.json({ status: 'Online', message: 'AI Job Assistant Backend is connected to Supabase.' });
 });
