@@ -81,9 +81,12 @@ const evaluateJobMatch = async (jobTitle, jobDescription) => {
 const OpenAI = require('openai');
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+const Groq = require('groq-sdk');
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
 /**
  * Generates a custom cover letter and interview questions for a specific job.
- * FALLBACK: If Gemini fails, it tries OpenAI (ChatGPT).
+ * FALLBACK CHAIN: 1. Gemini (Free) -> 2. Groq (Free) -> 3. OpenAI (Paid)
  */
 const generateJobPrep = async (jobTitle, jobDescription) => {
     const resumePath = path.join(__dirname, 'resume.txt');
@@ -108,47 +111,62 @@ const generateJobPrep = async (jobTitle, jobDescription) => {
     ${jobTitle}: ${jobDescription}
     `;
 
-    // TRY GEMINI FIRST
+    // 1. TRY GEMINI (Free)
     try {
-        console.log("🤖 Attempting Pro Kit generation with Gemini...");
+        console.log("🤖 Attempting Pro Kit with Gemini...");
         const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
         const result = await model.generateContent(prompt);
         const responseText = result.response.text().trim();
         const cleanJsonStr = responseText.replace(/```json/gi, '').replace(/```/gi, '').trim();
-        
         const parsed = JSON.parse(cleanJsonStr);
         return {
             coverLetter: parsed.coverLetter || parsed.cover_letter || "Generated.",
             interviewPrep: parsed.interviewPrep || parsed.interview_questions || "Generated."
         };
     } catch (geminiError) {
-        console.warn("⚠️ Gemini failed, checking for OpenAI fallback...");
+        console.warn("⚠️ Gemini failed, trying Groq fallback...");
 
-        // TRY OPENAI FALLBACK
+        // 2. TRY GROQ (Free)
+        if (process.env.GROQ_API_KEY) {
+            try {
+                console.log("🚀 Using Groq fallback...");
+                const chatCompletion = await groq.chat.completions.create({
+                    messages: [{ role: "user", content: prompt }],
+                    model: "llama-3.3-70b-versatile",
+                    response_format: { type: "json_object" }
+                });
+                const parsed = JSON.parse(chatCompletion.choices[0].message.content);
+                return {
+                    coverLetter: parsed.coverLetter || parsed.cover_letter || "Generated (Groq).",
+                    interviewPrep: parsed.interviewPrep || parsed.interview_questions || "Generated (Groq)."
+                };
+            } catch (groqError) {
+                console.warn("⚠️ Groq failed, trying OpenAI fallback...");
+            }
+        }
+
+        // 3. TRY OPENAI (Paid)
         if (process.env.OPENAI_API_KEY) {
             try {
-                console.log("🚀 Gemini failed. Using ChatGPT fallback...");
+                console.log("🔥 Using ChatGPT fallback...");
                 const response = await openai.chat.completions.create({
                     model: "gpt-4o",
                     messages: [{ role: "user", content: prompt }],
                     response_format: { type: "json_object" }
                 });
-                
                 const parsed = JSON.parse(response.choices[0].message.content);
                 return {
                     coverLetter: parsed.coverLetter || parsed.cover_letter || "Generated (ChatGPT).",
                     interviewPrep: parsed.interviewPrep || parsed.interview_questions || "Generated (ChatGPT)."
                 };
             } catch (openaiError) {
-                console.error("❌ Both Gemini and OpenAI failed.");
+                console.error("❌ All AI models failed.");
             }
-        } else {
-            console.warn("❌ OpenAI API Key missing. Cannot use fallback.");
         }
 
         return { 
-            coverLetter: "Generation failed. Please check your API keys or try again later.", 
-            interviewPrep: "Generation failed. Please check your API keys or try again later." 
+            coverLetter: "Generation failed. Please check your API keys.", 
+            interviewPrep: "Generation failed. Please check your API keys." 
         };
     }
 };
