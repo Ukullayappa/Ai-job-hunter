@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "hunt": "node scraper.js"
+    "hunt": "node scraper.js",
+    "postinstall": "node -e \"process.env.PUPPETEER_CACHE_DIR=require('path').join(process.cwd(), '.cache', 'puppeteer'); require('child_process').execSync('npx puppeteer browsers install chrome', {stdio: 'inherit'})\""
   },
   "keywords": [],
   "author": "",

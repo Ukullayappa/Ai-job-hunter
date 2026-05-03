@@ -1,4 +1,7 @@
 require('dotenv').config();
+const path = require('path');
+process.env.PUPPETEER_CACHE_DIR = path.join(__dirname, '.cache', 'puppeteer');
+
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { evaluateJobMatch } = require('./ai_matcher');
