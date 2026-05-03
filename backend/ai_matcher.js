@@ -5,30 +5,21 @@ const fs = require('fs');
 const path = require('path');
 const { getRecentActivity } = require('./github_service');
 
-// Initialize Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "dummy_key");
 
-/**
- * Analyzes a job description against the user's resume using AI.
- * @param {string} jobTitle - The title of the job.
- * @param {string} jobDescription - The full text of the job description.
- * @returns {Promise<{ score: number, summary: string }>}
- */
 const evaluateJobMatch = async (jobTitle, jobDescription) => {
     try {
         if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "your_gemini_api_key_here") {
             console.log("[MOCK AI MATCHER] Returning fake data because API key is missing.");
             return {
-                score: Math.floor(Math.random() * 40) + 60, // random score between 60 and 100
+                score: Math.floor(Math.random() * 40) + 60,
                 summary: "This is a mock AI summary. Please add your Gemini API key to see real results."
             };
         }
 
-        // Read the user's resume
         const resumePath = path.join(__dirname, 'resume.txt');
         const userResume = fs.readFileSync(resumePath, 'utf8');
 
-        // Prepare the prompt
         const prompt = `
         You are an expert tech recruiter and AI job matching assistant.
         I will provide you with a candidate's RESUME and a JOB DESCRIPTION for the role of "${jobTitle}".
@@ -47,8 +38,8 @@ const evaluateJobMatch = async (jobTitle, jobDescription) => {
         5. If a job requires 2+ years of experience, give it a low score (< 40).
 
         Return ONLY a JSON object with two fields:
-        1. "score": An integer from 0 to 100 representing the "Recruitment Probability Percentage" (how likely they are to get the job if they apply).
-        2. "summary": A detailed AI summary explaining exactly why they have this recruitment chance, highlighting their matching skills from their resume (like React, Node, SQL) and any missing requirements.
+        1. "score": An integer from 0 to 100 representing the "Recruitment Probability Percentage".
+        2. "summary": A detailed AI summary explaining exactly why they have this recruitment chance.
         
         Do NOT wrap the JSON in markdown code blocks. Just output raw JSON.
 
@@ -62,15 +53,10 @@ const evaluateJobMatch = async (jobTitle, jobDescription) => {
         const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
         const result = await model.generateContent(prompt);
         const responseText = result.response.text().trim();
-        
-        // Parse the JSON (stripping markdown if the AI accidentally added it)
         const cleanJsonStr = responseText.replace(/```json/gi, '').replace(/```/gi, '').trim();
         const parsed = JSON.parse(cleanJsonStr);
 
-        return {
-            score: parsed.score,
-            summary: parsed.summary
-        };
+        return { score: parsed.score, summary: parsed.summary };
 
     } catch (error) {
         console.error("❌ Error in AI Matcher:", error.message);
@@ -78,16 +64,10 @@ const evaluateJobMatch = async (jobTitle, jobDescription) => {
     }
 };
 
-const OpenAI = require('openai');
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
+// ✅ Groq initialized safely at top level (only needs GROQ_API_KEY)
 const Groq = require('groq-sdk');
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-/**
- * Generates a custom cover letter and interview questions for a specific job.
- * FALLBACK CHAIN: 1. Gemini (Free) -> 2. Groq (Free) -> 3. OpenAI (Paid)
- */
 const generateJobPrep = async (jobTitle, jobDescription) => {
     const resumePath = path.join(__dirname, 'resume.txt');
     const userResume = fs.readFileSync(resumePath, 'utf8');
@@ -126,7 +106,7 @@ const generateJobPrep = async (jobTitle, jobDescription) => {
     } catch (geminiError) {
         console.warn("⚠️ Gemini failed, trying Groq fallback...");
 
-        // 2. TRY GROQ (Free)
+        // 2. TRY GROQ (Free) ✅
         if (process.env.GROQ_API_KEY) {
             try {
                 console.log("🚀 Using Groq fallback...");
@@ -141,26 +121,7 @@ const generateJobPrep = async (jobTitle, jobDescription) => {
                     interviewPrep: parsed.interviewPrep || parsed.interview_questions || "Generated (Groq)."
                 };
             } catch (groqError) {
-                console.warn("⚠️ Groq failed, trying OpenAI fallback...");
-            }
-        }
-
-        // 3. TRY OPENAI (Paid)
-        if (process.env.OPENAI_API_KEY) {
-            try {
-                console.log("🔥 Using ChatGPT fallback...");
-                const response = await openai.chat.completions.create({
-                    model: "gpt-4o",
-                    messages: [{ role: "user", content: prompt }],
-                    response_format: { type: "json_object" }
-                });
-                const parsed = JSON.parse(response.choices[0].message.content);
-                return {
-                    coverLetter: parsed.coverLetter || parsed.cover_letter || "Generated (ChatGPT).",
-                    interviewPrep: parsed.interviewPrep || parsed.interview_questions || "Generated (ChatGPT)."
-                };
-            } catch (openaiError) {
-                console.error("❌ All AI models failed.");
+                console.error("❌ Groq also failed:", groqError.message);
             }
         }
 
